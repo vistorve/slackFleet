@@ -1,0 +1,26 @@
+"""
+Configuration values for slack integration and supporting functions
+"""
+
+## Slack auth ##
+
+# The base-64 encoded, encrypted Slack command token (CiphertextBlob)
+# this ensures that the expected slack instance is the one you are communicating with
+ENCRYPTED_EXPECTED_TOKEN = "" 
+
+## EVE CREST ##
+
+# base64.b64encode(clientID:ClientSecret), used for EVE SSO authentication of registered app
+AUTH = ""
+# ClientID from registered EVE CREST app
+CLIENT_ID = ""
+# Redirect URI entered for registered EVE CREST app, after logging in CREST sends the users
+# browsers to here with the authentication information as JSON
+REDIRECT_URI = "sso_redirect lambda API gateway"
+
+# EVE CREST root, should be fairly static
+CREST_URI = "https://crest-tq.eveonline.com/"
+
+## Misc Settings ##
+# URI that will be used as end point for shared fits
+SHARE_ENDPOINT = "get_shared_fit lambda API gateway"
