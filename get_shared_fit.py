@@ -20,10 +20,21 @@ def lambda_handler(event, context):
         return "Unknown fit"
 
     html = "<html><body><pre>{}</pre></body></html>".format(convert_to_eft(json.loads(fit['Items'][0]['fit'])))
-    #html.replace("\\n", "<br>")
+
     return html
 
 def parse_type(type_json):
+    """
+    Parse a crest type to determine slot.
+
+    Power slots have an effect.name in the valid_slots set.
+    Charge/Cargo have attribute.name == "chargeSize"
+    Drones have "drone" in description
+
+    :param type_json: dict, crest type json
+
+    :returns: item_name (string), is_drone (bool), is_charge (bool), slot (string)
+    """
     # find slot
     slot = None
     for effect in type_json['dogma']['effects']:
@@ -47,6 +58,11 @@ def parse_type(type_json):
 def get_type(type_id, crest_url):
     """
     Query CREST if the type hasn't been cached yet
+
+    :param type_id: int, crest type id
+    :param crest_url: string, the crest url for that type
+
+    :returns: The crest json for the type_id
     """
     types_db = boto3.resource('dynamodb').Table('CREST_types')
 
@@ -62,6 +78,15 @@ def get_type(type_id, crest_url):
     return type_dict
 
 def convert_to_eft(crest_json):
+    """
+    Convert a crest fitting json into EFT format.
+
+    TODO: Support T3 ship mods
+
+    :param crest_json: dict, crest fitting
+
+    :returns: EFT format for the fitting
+    """
     slots = {LOW: defaultdict(int),
              MID: defaultdict(int),
              HIGH: defaultdict(int),
@@ -80,6 +105,15 @@ def convert_to_eft(crest_json):
             charge[item_type['name']] += item['quantity']
 
     def format_mods(mods_dict, list_multiple=True):
+        """
+        Format each power level, plus rigs into the EFT style list. Includes logic for
+        the [item] x[quantity] pattern if list_multiple is False.
+
+        :param mods_dict: dict, {moduleString: quantityInt, ...}
+        :param list_multiple: bool, if True list out moduleString quantityInt times
+
+        :returns: string, EFT formatted for that module group
+        """
         mods = []
         for mod, quant in mods_dict.iteritems():
             if quant > 1:
